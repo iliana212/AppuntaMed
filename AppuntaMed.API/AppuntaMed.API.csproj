@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>53497e2b-82e3-4cb1-9307-5eee52b52d1e</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.14" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.14" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.13">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Scalar.AspNetCore" Version="2.19.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AppuntaMed.Application\AppuntaMed.Application.csproj" />
+    <ProjectReference Include="..\AppuntaMed.Notifications\AppuntaMed.Notifications.csproj" />
+    <ProjectReference Include="..\AppuntaMed.Persistence\AppuntaMed.Persistence.csproj" />
+    <ProjectReference Include="..\AppuntaMed.Security\AppuntaMed.Security.csproj" />
+  </ItemGroup>
+
+</Project>

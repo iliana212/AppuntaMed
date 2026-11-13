@@ -1,0 +1,17 @@
+<Solution>
+  <Folder Name="/API/">
+    <Project Path="AppuntaMed.API/AppuntaMed.API.csproj" Id="fffedeff-c9fa-487f-b4d3-1bcfd11d7158" />
+  </Folder>
+  <Folder Name="/Core/">
+    <Project Path="AppuntaMed.Application/AppuntaMed.Application.csproj" Id="b4d9fdad-1073-479b-8d88-24a90c509ce5" />
+    <Project Path="AppuntaMed.Domain/AppuntaMed.Domain.csproj" />
+  </Folder>
+  <Folder Name="/Infrastructure/">
+    <Project Path="AppuntaMed.Notifications/AppuntaMed.Notifications.csproj" Id="024a27bb-2c1c-4f03-aee3-0d0172e783d9" />
+    <Project Path="AppuntaMed.Persistence/AppuntaMed.Persistence.csproj" Id="c3946dcf-c0a0-4429-8ddf-98beeb16d196" />
+    <Project Path="AppuntaMed.Security/AppuntaMed.Security.csproj" Id="7c334d15-dbe6-4ce8-925a-d2ef07ab2ec1" />
+  </Folder>
+  <Folder Name="/Tests/">
+    <Project Path="AppuntaMed.Tests/AppuntaMed.Tests.csproj" Id="e9c1f608-b512-4ae4-8301-2fa4cb22ea38" />
+  </Folder>
+</Solution>
