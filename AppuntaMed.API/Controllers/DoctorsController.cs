@@ -43,8 +43,8 @@ namespace AppuntaMed.API.Controllers
 			{
 				FirstName = doctorDTO.FirstName,
 				LastName = doctorDTO.LastName,
-				Profession = doctorDTO.Profession,
-				Speciality = doctorDTO.Speciality,
+				ProfessionId = doctorDTO.ProfessionId,
+				SpecialityId = doctorDTO.SpecialityId,
 				Email = doctorDTO.Email,
 				PhoneNumber = doctorDTO.PhoneNumber				
 			};
@@ -63,8 +63,8 @@ namespace AppuntaMed.API.Controllers
 				Id = id,
 				FirstName = doctorDTO.FirstName,
 				LastName = doctorDTO.LastName,
-				Profession = doctorDTO.Profession,
-				Speciality = doctorDTO.Speciality,
+				ProfessionId = doctorDTO.ProfessionId,
+				SpecialityId = doctorDTO.SpecialityId,
 				Email = doctorDTO.Email,
 				PhoneNumber = doctorDTO.PhoneNumber
 			};

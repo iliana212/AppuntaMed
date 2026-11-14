@@ -18,6 +18,7 @@
 				Permissions.PatientCreate,
 				Permissions.PatientReadOwn,
 				Permissions.DoctorRead,
+				Permissions.ProfessionRead,
 				Permissions.DoctorCreate,
 				Permissions.DoctorDelete,
 				Permissions.DoctorUpdate,
@@ -37,6 +38,7 @@
 				Permissions.AppointmentCancel,
 				Permissions.PatientRead,
 				Permissions.DoctorRead,
+				Permissions.ProfessionRead,
 				Permissions.DoctorUpdate,
 				Permissions.DoctorCreate,
 				Permissions.ConsultingRoomRead
@@ -48,6 +50,7 @@
 				Permissions.AppointmentReadOwn,
 				Permissions.AppointmentCancel,
 				Permissions.DoctorRead,
+				Permissions.ProfessionRead,
 				Permissions.ConsultingRoomRead,
 				Permissions.PatientReadOwn,
 				Permissions.PatientUpdate,

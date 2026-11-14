@@ -9,67 +9,12 @@ namespace AppuntaMed.API.Utilities
 	{
 		public static IServiceCollection AddAppAuthorization(this IServiceCollection services)
 		{
-			services.AddAuthorizationBuilder()
-				.AddPolicy(Permissions.AppointmentComplete, p => p.Requirements.Add(
-						new PermissionRequirement(Permissions.AppointmentComplete)))
+			var authorization = services.AddAuthorizationBuilder();
 
-				.AddPolicy(Permissions.AppointmentCreate, p => p.Requirements.Add(
-						new PermissionRequirement(Permissions.AppointmentCreate)))
-
-				.AddPolicy(Permissions.AppointmentRead, p => p.Requirements.Add(
-						new PermissionRequirement(Permissions.AppointmentRead)))
-
-				.AddPolicy(Permissions.AppointmentReadOwn, p => p.Requirements.Add(
-						new PermissionRequirement(Permissions.AppointmentReadOwn)))
-
-				.AddPolicy(Permissions.AppointmentNoShow, p => p.Requirements.Add(
-						new PermissionRequirement(Permissions.AppointmentNoShow)))
-
-				.AddPolicy(Permissions.AppointmentCancel, p => p.Requirements.Add(
-						new PermissionRequirement(Permissions.AppointmentCancel)))
-
-				.AddPolicy(Permissions.PatientCreate, p => p.Requirements.Add(
-						new PermissionRequirement(Permissions.PatientCreate)))
-
-				.AddPolicy(Permissions.PatientDelete, p => p.Requirements.Add(
-						new PermissionRequirement(Permissions.PatientDelete)))
-
-				.AddPolicy(Permissions.PatientRead, p => p.Requirements.Add(
-						new PermissionRequirement(Permissions.PatientRead)))
-
-				.AddPolicy(Permissions.PatientReadOwn, p => p.Requirements.Add(
-						new PermissionRequirement(Permissions.PatientReadOwn)))
-
-				.AddPolicy(Permissions.PatientUpdate, p => p.Requirements.Add(
-						new PermissionRequirement(Permissions.PatientUpdate)))
-
-				.AddPolicy(Permissions.DoctorCreate, p => p.Requirements.Add(
-						new PermissionRequirement(Permissions.DoctorCreate)))
-
-				.AddPolicy(Permissions.DoctorRead, p => p.Requirements.Add(
-						new PermissionRequirement(Permissions.DoctorRead)))
-
-				.AddPolicy(Permissions.DoctorUpdate, p => p.Requirements.Add(
-						new PermissionRequirement(Permissions.DoctorUpdate)))
-
-				.AddPolicy(Permissions.DoctorDelete, p => p.Requirements.Add(
-						new PermissionRequirement(Permissions.DoctorDelete)))
-
-				.AddPolicy(Permissions.ConsultingRoomCreate, p => p.Requirements.Add(
-						new PermissionRequirement(Permissions.ConsultingRoomCreate)))
-
-				.AddPolicy(Permissions.ConsultingRoomRead, p => p.Requirements.Add(
-						new PermissionRequirement(Permissions.ConsultingRoomRead)))
-
-				.AddPolicy(Permissions.ConsultingRoomUpdate, p => p.Requirements.Add(
-						new PermissionRequirement(Permissions.ConsultingRoomUpdate)))
-
-				.AddPolicy(Permissions.ConsultingRoomDelete, p => p.Requirements.Add(
-						new PermissionRequirement(Permissions.ConsultingRoomDelete)))
-
-				.AddPolicy(Permissions.UserManage, p => p.Requirements.Add(
-						new PermissionRequirement(Permissions.UserManage)));
-
+			foreach (var permission in Permissions.All)
+			{
+				authorization.AddPolicy(permission, policy => policy.Requirements.Add(new PermissionRequirement(permission)));
+			}
 
 			services.AddScoped<IAuthorizationHandler, PermissionHandler>();
 			services.AddTransient<IClaimsTransformation, PermissionClaimsTransformation>();

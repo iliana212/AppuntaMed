@@ -1,8 +1,4 @@
 ﻿using AppuntaMed.Domain.Entities;
-using System;
-using System.Collections.Generic;
-using System.Runtime.CompilerServices;
-using System.Text;
 
 namespace AppuntaMed.Application.UseCases.Doctors.Queries.GetDoctorDetail
 {
@@ -10,18 +6,21 @@ namespace AppuntaMed.Application.UseCases.Doctors.Queries.GetDoctorDetail
 	{
 		public static DoctorDetailDTO ToDTO(this Doctor doctor)
 		{
-			var dto = new DoctorDetailDTO(
-				doctor.Id, 
-				doctor.FirstName, 
-				doctor.LastName, 
-				doctor.Profession, 
-				doctor.Speciality,
-				doctor.Email.Value, 
-				doctor.PhoneNumber.Value, 
+			var profession = doctor.Profession
+               ?? throw new InvalidOperationException("Doctor.Profession was not loaded");
+			
+			return new DoctorDetailDTO(
+				doctor.Id,
+				doctor.FirstName,
+				doctor.LastName,
+				doctor.ProfessionId,
+				profession.Name,
+				doctor.SpecialityId,
+				doctor.Speciality?.Name,
+				doctor.Email.Value,
+				doctor.PhoneNumber.Value,
 				$"{doctor.FirstName} {doctor.LastName}"
 			);
-
-			return dto;
 		}
 	}
 }

@@ -1,8 +1,5 @@
 ﻿using AppuntaMed.Domain.Exceptions;
 using AppuntaMed.Domain.ValueObjects;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace AppuntaMed.Domain.Entities
 {
@@ -11,14 +8,16 @@ namespace AppuntaMed.Domain.Entities
 		public Guid Id { get; private set; }
 		public string FirstName { get; private set; } = string.Empty;
 		public string LastName { get; private set; } = string.Empty;
-		public string Profession { get; private set; } = string.Empty;
-		public string Speciality { get; private set; } = string.Empty;
+		public Guid ProfessionId { get; private set; }
+		public Guid? SpecialityId { get; private set; }
 		public Email Email { get; private set; } = null!;
 		public PhoneNumber PhoneNumber { get; private set; } = null!;
 		public string UserId { get; private set; } = string.Empty;
+		public Profession Profession { get; private set; } = null!;
+		public Speciality? Speciality { get; private set; }
 
 		private Doctor() { }
-		public Doctor(string firstName, string lastName, string profession, string specialty, Email email, PhoneNumber phoneNumber, string userId)
+		public Doctor(string firstName, string lastName, Guid professionId, Guid? specialityId, Email email, PhoneNumber phoneNumber, string userId)
 		{
 			if (string.IsNullOrWhiteSpace(firstName))
 				throw new BusinessRuleException($"{nameof(firstName)} is Required");
@@ -29,13 +28,15 @@ namespace AppuntaMed.Domain.Entities
 			if (email is null)
 				throw new BusinessRuleException($"{nameof(email)} is Required");
 
+			ValidateSpecialization(professionId, specialityId);
+
 			Id = Guid.CreateVersion7();
 			FirstName = firstName;
 			LastName = lastName;
 			Email = email;
 			PhoneNumber = phoneNumber;
-			Profession = profession;
-			Speciality = specialty;
+			ProfessionId = professionId;
+			SpecialityId = specialityId;
 			UserId = userId;
 		}
 
@@ -55,20 +56,12 @@ namespace AppuntaMed.Domain.Entities
 			LastName = lastName;
 		}
 
-		public void UpdateProfession(string profession)
+		public void UpdateSpecialization(Guid professionId, Guid? specialityId)
 		{
-			if (string.IsNullOrWhiteSpace(profession))
-				throw new BusinessRuleException($"{nameof(profession)} is Required");
+			ValidateSpecialization(professionId, specialityId);
 
-			Profession = profession;
-		}
-
-		public void UpdateSpeciality(string speciality)
-		{
-			if (string.IsNullOrWhiteSpace(speciality))
-				throw new BusinessRuleException($"{nameof(speciality)} is Required");
-
-			Speciality = speciality;
+			ProfessionId = professionId;
+			SpecialityId = specialityId;
 		}
 
 		public void UpdateEmail(Email email)
@@ -85,6 +78,27 @@ namespace AppuntaMed.Domain.Entities
 				throw new BusinessRuleException($"{nameof(phoneNumber)} is Required");
 
 			PhoneNumber = phoneNumber;
+		}
+
+		public void AssignCatalog(Profession profession, Speciality? speciality)
+		{
+			if (profession.Id != ProfessionId)
+				throw new BusinessRuleException("The profession does not match the doctor's profession");
+
+			if (speciality is not null && speciality.Id != SpecialityId)
+				throw new BusinessRuleException("The speciality does not match the doctor's speciality");
+
+			Profession = profession;
+			Speciality = speciality;
+		}
+
+		private static void ValidateSpecialization(Guid professionId, Guid? specialityId)
+		{
+			if (professionId == Guid.Empty)
+				throw new BusinessRuleException($"{nameof(professionId)} is Required");
+
+			if (specialityId == Guid.Empty)
+				throw new BusinessRuleException($"{nameof(specialityId)} must be a valid id or null");
 		}
 	}
 }

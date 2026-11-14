@@ -8,7 +8,8 @@ using AppuntaMed.Domain.ValueObjects;
 
 namespace AppuntaMed.Application.UseCases.Doctors.Commands.UpdateDoctor
 {
-	public class UpdateDoctorHandler(IDoctorRepository repository, IUnitOfWork unitOfWork, ICurrentUserService currentUser) : IRequestHandler<UpdateDoctorCommand>
+	public class UpdateDoctorHandler(IDoctorRepository repository, IUnitOfWork unitOfWork, ICurrentUserService currentUser,
+		IProfessionRepository professions) : IRequestHandler<UpdateDoctorCommand>
 	{
 		public async Task Handle(UpdateDoctorCommand request)
 		{
@@ -19,10 +20,11 @@ namespace AppuntaMed.Application.UseCases.Doctors.Commands.UpdateDoctor
 
 			currentUser.EnsureOwnsDoctorProfile(doctor);
 
+			await professions.EnsureValidSpecialization(request.ProfessionId, request.SpecialityId);
+
 			doctor.UpdateFirstName(request.FirstName);
 			doctor.UpdateLastName(request.LastName);
-			doctor.UpdateProfession(request.Profession);
-			doctor.UpdateSpeciality(request.Speciality);
+			doctor.UpdateSpecialization(request.ProfessionId, request.SpecialityId);
 			doctor.UpdateEmail(new Email(request.Email));
 			doctor.UpdatePhoneNumber(new PhoneNumber(request.PhoneNumber));			
 

@@ -1,4 +1,6 @@
-﻿namespace AppuntaMed.Application.Security
+﻿using System.Reflection;
+
+namespace AppuntaMed.Application.Security
 {
 	public static class Permissions
 	{
@@ -20,11 +22,19 @@
 		public const string DoctorUpdate = "doctor.update";
 		public const string DoctorDelete = "doctor.delete";
 
+		public const string ProfessionRead = "profession.read";
+
 		public const string ConsultingRoomCreate = "consultingroom.create";
 		public const string ConsultingRoomRead = "consultingroom.read";
 		public const string ConsultingRoomUpdate = "consultingroom.update";
 		public const string ConsultingRoomDelete = "consultingroom.delete";
 
 		public const string UserManage = "user.manage";
+
+		public static IReadOnlyList<string> All { get; } = typeof(Permissions)
+           .GetFields(BindingFlags.Public | BindingFlags.Static)
+           .Where(f => f.IsLiteral && f.FieldType == typeof(string))
+           .Select(f => (string)f.GetRawConstantValue()!)
+           .ToList();
 	}
 }

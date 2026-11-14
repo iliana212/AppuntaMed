@@ -25,6 +25,7 @@
     <ProjectReference Include="..\AppuntaMed.API\AppuntaMed.API.csproj" />
     <ProjectReference Include="..\AppuntaMed.Application\AppuntaMed.Application.csproj" />
     <ProjectReference Include="..\AppuntaMed.Domain\AppuntaMed.Domain.csproj" />
+    <ProjectReference Include="..\AppuntaMed.Persistence\AppuntaMed.Persistence.csproj" />
   </ItemGroup>
 
   <ItemGroup>

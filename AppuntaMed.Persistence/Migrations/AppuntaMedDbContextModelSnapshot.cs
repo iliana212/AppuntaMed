@@ -97,15 +97,11 @@ namespace AppuntaMed.Persistence.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<string>("Profession")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                    b.Property<Guid>("ProfessionId")
+                        .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Speciality")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                    b.Property<Guid?>("SpecialityId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("UserId")
                         .IsRequired()
@@ -137,6 +133,8 @@ namespace AppuntaMed.Persistence.Migrations
 
                     b.HasIndex("UserId")
                         .IsUnique();
+
+                    b.HasIndex("ProfessionId", "SpecialityId");
 
                     b.ToTable("Doctors");
                 });
@@ -194,6 +192,190 @@ namespace AppuntaMed.Persistence.Migrations
                     b.ToTable("Patients");
                 });
 
+            modelBuilder.Entity("AppuntaMed.Domain.Entities.Profession", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("Professions");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("6b792a54-4790-54b6-9a3c-afda9ef91c02"),
+                            Name = "Physician"
+                        },
+                        new
+                        {
+                            Id = new Guid("67c0884c-ef4f-5457-8017-9eaffff23484"),
+                            Name = "Dentist"
+                        },
+                        new
+                        {
+                            Id = new Guid("835fbbce-e62b-5cf7-8d8f-fa26f607dcbc"),
+                            Name = "Psychologist"
+                        },
+                        new
+                        {
+                            Id = new Guid("38113eab-b310-54d2-98b0-fd0450bafdda"),
+                            Name = "Nutritionist"
+                        },
+                        new
+                        {
+                            Id = new Guid("4bc5ba9b-f30a-5d65-9e16-a8489db164f2"),
+                            Name = "Physiotherapist"
+                        });
+                });
+
+            modelBuilder.Entity("AppuntaMed.Domain.Entities.Speciality", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<Guid>("ProfessionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProfessionId", "Name")
+                        .IsUnique();
+
+                    b.ToTable("Specialities");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("f5e73d96-1596-5201-8839-c19b357982c7"),
+                            Name = "Cardiology",
+                            ProfessionId = new Guid("6b792a54-4790-54b6-9a3c-afda9ef91c02")
+                        },
+                        new
+                        {
+                            Id = new Guid("41e09464-6560-5c1d-b10a-c211bec0000b"),
+                            Name = "Dermatology",
+                            ProfessionId = new Guid("6b792a54-4790-54b6-9a3c-afda9ef91c02")
+                        },
+                        new
+                        {
+                            Id = new Guid("09354c8d-3ceb-5b8c-9472-7c2c4459f4ed"),
+                            Name = "Pediatrics",
+                            ProfessionId = new Guid("6b792a54-4790-54b6-9a3c-afda9ef91c02")
+                        },
+                        new
+                        {
+                            Id = new Guid("d57c3270-0034-5a73-b4bf-181842b8282b"),
+                            Name = "Neurology",
+                            ProfessionId = new Guid("6b792a54-4790-54b6-9a3c-afda9ef91c02")
+                        },
+                        new
+                        {
+                            Id = new Guid("a1612ff6-43da-5f0b-bebd-a050bb743a67"),
+                            Name = "Gynecology",
+                            ProfessionId = new Guid("6b792a54-4790-54b6-9a3c-afda9ef91c02")
+                        },
+                        new
+                        {
+                            Id = new Guid("277830e8-1588-5127-87a1-3a033f9039ec"),
+                            Name = "Ophthalmology",
+                            ProfessionId = new Guid("6b792a54-4790-54b6-9a3c-afda9ef91c02")
+                        },
+                        new
+                        {
+                            Id = new Guid("d1742153-3c77-50f8-926a-91549b814fde"),
+                            Name = "Orthopedics",
+                            ProfessionId = new Guid("6b792a54-4790-54b6-9a3c-afda9ef91c02")
+                        },
+                        new
+                        {
+                            Id = new Guid("94aca0ac-0beb-567d-8643-7e70dfedf1e1"),
+                            Name = "Orthodontics",
+                            ProfessionId = new Guid("67c0884c-ef4f-5457-8017-9eaffff23484")
+                        },
+                        new
+                        {
+                            Id = new Guid("72cb5346-81f7-524f-a8ca-b6300ed0fa75"),
+                            Name = "Endodontics",
+                            ProfessionId = new Guid("67c0884c-ef4f-5457-8017-9eaffff23484")
+                        },
+                        new
+                        {
+                            Id = new Guid("17375fd5-cfec-5718-b98a-8b1c373ee7f5"),
+                            Name = "Periodontics",
+                            ProfessionId = new Guid("67c0884c-ef4f-5457-8017-9eaffff23484")
+                        },
+                        new
+                        {
+                            Id = new Guid("447f5876-4071-508a-a527-0cacbe8c8f7e"),
+                            Name = "Pediatric Dentistry",
+                            ProfessionId = new Guid("67c0884c-ef4f-5457-8017-9eaffff23484")
+                        },
+                        new
+                        {
+                            Id = new Guid("52f28894-8139-5bef-a1c4-c743ee322b1d"),
+                            Name = "Oral Surgery",
+                            ProfessionId = new Guid("67c0884c-ef4f-5457-8017-9eaffff23484")
+                        },
+                        new
+                        {
+                            Id = new Guid("6b812dc3-cc3e-5cf5-9b27-b6c02f9e291b"),
+                            Name = "Clinical Psychology",
+                            ProfessionId = new Guid("835fbbce-e62b-5cf7-8d8f-fa26f607dcbc")
+                        },
+                        new
+                        {
+                            Id = new Guid("f67434c6-c1a8-53e0-b69a-882ea762f2db"),
+                            Name = "Child Psychology",
+                            ProfessionId = new Guid("835fbbce-e62b-5cf7-8d8f-fa26f607dcbc")
+                        },
+                        new
+                        {
+                            Id = new Guid("186f64ad-3715-5339-b385-90fc46e1876f"),
+                            Name = "Neuropsychology",
+                            ProfessionId = new Guid("835fbbce-e62b-5cf7-8d8f-fa26f607dcbc")
+                        },
+                        new
+                        {
+                            Id = new Guid("c3628f69-0e58-5876-a247-a28d3ebddd2d"),
+                            Name = "Clinical Nutrition",
+                            ProfessionId = new Guid("38113eab-b310-54d2-98b0-fd0450bafdda")
+                        },
+                        new
+                        {
+                            Id = new Guid("4f739c23-17df-5e66-bcf6-ace6e9e08599"),
+                            Name = "Sports Nutrition",
+                            ProfessionId = new Guid("38113eab-b310-54d2-98b0-fd0450bafdda")
+                        },
+                        new
+                        {
+                            Id = new Guid("222c255e-75ad-58e4-8c18-964dd79b709e"),
+                            Name = "Sports Rehabilitation",
+                            ProfessionId = new Guid("4bc5ba9b-f30a-5d65-9e16-a8489db164f2")
+                        },
+                        new
+                        {
+                            Id = new Guid("52ab4b2d-5586-529b-9031-1a6b38380b40"),
+                            Name = "Neurological Rehabilitation",
+                            ProfessionId = new Guid("4bc5ba9b-f30a-5d65-9e16-a8489db164f2")
+                        });
+                });
+
             modelBuilder.Entity("AppuntaMed.Domain.Entities.Appointment", b =>
                 {
                     b.HasOne("AppuntaMed.Domain.Entities.ConsultingRoom", "ConsultingRoom")
@@ -219,6 +401,39 @@ namespace AppuntaMed.Persistence.Migrations
                     b.Navigation("Doctor");
 
                     b.Navigation("Patient");
+                });
+
+            modelBuilder.Entity("AppuntaMed.Domain.Entities.Doctor", b =>
+                {
+                    b.HasOne("AppuntaMed.Domain.Entities.Profession", "Profession")
+                        .WithMany()
+                        .HasForeignKey("ProfessionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("AppuntaMed.Domain.Entities.Speciality", "Speciality")
+                        .WithMany()
+                        .HasForeignKey("ProfessionId", "SpecialityId")
+                        .HasPrincipalKey("ProfessionId", "Id")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Profession");
+
+                    b.Navigation("Speciality");
+                });
+
+            modelBuilder.Entity("AppuntaMed.Domain.Entities.Speciality", b =>
+                {
+                    b.HasOne("AppuntaMed.Domain.Entities.Profession", null)
+                        .WithMany("Specialities")
+                        .HasForeignKey("ProfessionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("AppuntaMed.Domain.Entities.Profession", b =>
+                {
+                    b.Navigation("Specialities");
                 });
 #pragma warning restore 612, 618
         }

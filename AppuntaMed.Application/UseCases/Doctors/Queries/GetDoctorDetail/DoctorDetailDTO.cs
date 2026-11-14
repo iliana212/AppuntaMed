@@ -9,10 +9,12 @@ namespace AppuntaMed.Application.UseCases.Doctors.Queries.GetDoctorDetail
 		Guid Id,
 		string FirstName,
 		string LastName,
+		Guid ProfessionId,
 		string Profession,
-		string Speciality,
+		Guid? SpecialityId,
+		string? Speciality,
 		string Email,
-		string PhoneNumber,		
+		string PhoneNumber,
 		string Name
 	);
 }

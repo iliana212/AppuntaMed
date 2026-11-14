@@ -1,10 +1,6 @@
 ﻿using AppuntaMed.Application.Interfaces.Repositories;
-using AppuntaMed.Application.UseCases.Patients.Queries.GetPatientsList;
 using AppuntaMed.Application.Utilities.Mediator;
 using AppuntaMed.Application.Utilities.Shared;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace AppuntaMed.Application.UseCases.Doctors.Queries.GetDoctorsList
 {
@@ -16,17 +12,19 @@ namespace AppuntaMed.Application.UseCases.Doctors.Queries.GetDoctorsList
 			{
 				Page = request.Page,
 				PageSize = request.PageSize,
-				DoctorName = request.DoctorName
+				DoctorName = request.DoctorName,
+				ProfessionId = request.ProfessionId,
+				SpecialityId = request.SpecialityId
 			};
 			var doctors = await repository.GetFilter(filter);
 
-			var totalPatients = await repository.CountAll();
+			var totalDoctors = await repository.CountFilter(filter);
 			var dto = doctors.Select(x => x.ToDTO()).ToList();
 
 			var doctorsDTO = new PaginationDTO<DoctorsListDTO>
 			{
 				Items = dto,
-				Total = totalPatients
+				Total = totalDoctors
 			};
 
 			return doctorsDTO;

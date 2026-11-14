@@ -17,13 +17,12 @@ namespace AppuntaMed.Application.UseCases.Doctors.Commands.UpdateDoctor
 				.NotEmpty().WithMessage("{PropertyName} is required")
 				.MaximumLength(100).WithMessage("{PropertyName} must be {MaxLength} chars or fewer");
 
-			RuleFor(p => p.Profession)
-				.NotEmpty().WithMessage("{PropertyName} is required")
-				.MaximumLength(100).WithMessage("{PropertyName} must be {MaxLength} chars or fewer");
+			RuleFor(p => p.ProfessionId)
+                .NotEmpty().WithMessage("{PropertyName} is required");
 
-			RuleFor(p => p.Speciality)
-				.NotEmpty().WithMessage("{PropertyName} is required")
-				.MaximumLength(100).WithMessage("{PropertyName} must be {MaxLength} chars or fewer");
+			RuleFor(p => p.SpecialityId)
+                .NotEqual(Guid.Empty).WithMessage("{PropertyName} must be a valid id or null")
+                .When(p => p.SpecialityId.HasValue);
 
 			RuleFor(p => p.Email)
 				.NotEmpty().WithMessage("{PropertyName} is required")

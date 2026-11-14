@@ -13,11 +13,15 @@ namespace AppuntaMed.Tests.Application.UseCases.Doctors
 		private readonly IDoctorRepository _repository = Substitute.For<IDoctorRepository>();
 		private readonly IUnitOfWork _unitOfWork = Substitute.For<IUnitOfWork>();
 		private readonly ICurrentUserService _currentUser = Substitute.For<ICurrentUserService>();
+		private readonly IProfessionRepository _professions = Substitute.For<IProfessionRepository>();
+
 		private readonly Doctor _carlos = TestData.Doctor("user-carlos");
+		private readonly Profession _dentist = TestData.Profession("Dentist", "Orthodontics");
 
 		public DoctorAuthorizationTests()
 		{
 			_repository.GetById(_carlos.Id).Returns(Task.FromResult<Doctor?>(_carlos));
+			_professions.GetByIdWithSpecialities(_dentist.Id).Returns(Task.FromResult<Profession?>(_dentist));
 		}
 
 		private void LoginAs(string userId, string role)
@@ -26,39 +30,40 @@ namespace AppuntaMed.Tests.Application.UseCases.Doctors
 			_currentUser.Roles.Returns(new[] { role });
 		}
 
+		private UpdateDoctorHandler CreateHandler() => new(_repository, _unitOfWork, _currentUser, _professions);
+
 		private UpdateDoctorCommand NewUpdate() => new()
 		{
 			Id = _carlos.Id,
 			FirstName = "Carlos",
 			LastName = "Pérez",
-			Profession = "Neurology",
-			Speciality = "Epilepsy",
+			ProfessionId = _dentist.Id,
+			SpecialityId = _dentist.Specialities.Single().Id,
 			Email = "carlos@example.com",
 			PhoneNumber = "5555678"
 		};
 
 		[Fact]
-        public async Task Update_DoctorUpdatesOwnProfile_ChangesProfessionAndSpecialityIndependently()
-        {
+		public async Task Update_DoctorUpdatesOwnProfile_ChangesProfessionAndSpeciality()
+		{
 			LoginAs("user-carlos", "Doctor");
-			var handler = new UpdateDoctorHandler(_repository, _unitOfWork, _currentUser);
-	
-			await handler.Handle(NewUpdate());
-	
-			Assert.Equal("Neurology", _carlos.Profession);
-			Assert.Equal("Epilepsy", _carlos.Speciality);
+			await CreateHandler().Handle(NewUpdate());
+
+			Assert.Equal(_dentist.Id, _carlos.ProfessionId);
+			Assert.Equal(_dentist.Specialities.Single().Id, _carlos.SpecialityId);
+
 			await _unitOfWork.Received(1).Commit();
 	    }
 
 		[Fact]
-        public async Task Update_DoctorUpdatesAnotherDoctor_ThrowsForbidden_AndKeepsData()
-        {
+		public async Task Update_DoctorUpdatesAnotherDoctor_ThrowsForbidden_AndKeepsData()
+		{
+			var originalProfessionId = _carlos.ProfessionId;
 			LoginAs("user-laura", "Doctor");
-			var handler = new UpdateDoctorHandler(_repository, _unitOfWork, _currentUser);
-	
-			await Assert.ThrowsAsync<ForbiddenException>(() => handler.Handle(NewUpdate()));
-	
-			Assert.Equal("Cardiology", _carlos.Profession);
+
+			await Assert.ThrowsAsync<ForbiddenException>(() => CreateHandler().Handle(NewUpdate()));
+			Assert.Equal(originalProfessionId, _carlos.ProfessionId);
+
 			await _unitOfWork.DidNotReceive().Commit();
 	    }
 
@@ -66,11 +71,9 @@ namespace AppuntaMed.Tests.Application.UseCases.Doctors
         public async Task Update_Admin_CanUpdateAnyDoctor()
         {
 			LoginAs("admin-user", "Admin");
-			var handler = new UpdateDoctorHandler(_repository, _unitOfWork, _currentUser);
-	
-			await handler.Handle(NewUpdate());
-	
-			Assert.Equal("Epilepsy", _carlos.Speciality);
-	    }
+			await CreateHandler().Handle(NewUpdate());
+			
+			Assert.Equal(_dentist.Id, _carlos.ProfessionId);
+		}
 	}
 }

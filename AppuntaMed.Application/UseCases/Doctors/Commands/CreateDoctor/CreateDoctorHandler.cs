@@ -5,10 +5,12 @@ using AppuntaMed.Application.Utilities.Mediator;
 using AppuntaMed.Domain.Entities;
 using AppuntaMed.Domain.Exceptions;
 using AppuntaMed.Domain.ValueObjects;
+using System.Numerics;
 
 namespace AppuntaMed.Application.UseCases.Doctors.Commands.CreateDoctor
 {
-	public class CreateDoctorHandler(IDoctorRepository repository, IUnitOfWork unitOfWork, ICurrentUserService currentUser) : IRequestHandler<CreateDoctorCommand, Guid>
+	public class CreateDoctorHandler(IDoctorRepository repository, IUnitOfWork unitOfWork, ICurrentUserService currentUser,
+		IProfessionRepository professions) : IRequestHandler<CreateDoctorCommand, Guid>
 	{
 		public async Task<Guid> Handle(CreateDoctorCommand request)
 		{
@@ -21,8 +23,10 @@ namespace AppuntaMed.Application.UseCases.Doctors.Commands.CreateDoctor
 			if (exists)
 				throw new BusinessRuleException("Doctor profile already exists");
 
-			var doctor = new Doctor(request.FirstName, request.LastName, request.Profession, request.Speciality, email, phone, userId);
-						
+			await professions.EnsureValidSpecialization(request.ProfessionId, request.SpecialityId);
+			
+			var doctor = new Doctor(request.FirstName, request.LastName, request.ProfessionId, request.SpecialityId, email, phone, userId);
+
 			try
 			{
 				var result = await repository.Add(doctor);

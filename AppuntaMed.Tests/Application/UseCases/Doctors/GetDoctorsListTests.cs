@@ -1,112 +1,81 @@
 ﻿using AppuntaMed.Application.Interfaces.Repositories;
 using AppuntaMed.Application.UseCases.Doctors.Queries.GetDoctorsList;
 using AppuntaMed.Domain.Entities;
-using AppuntaMed.Domain.ValueObjects;
 using NSubstitute;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace AppuntaMed.Tests.Application.UseCases.Doctors
 {
 	public class GetDoctorsListTests
 	{
 		private readonly IDoctorRepository _repository = Substitute.For<IDoctorRepository>();
+		private void ReturnDoctors(params Doctor[] doctors)
+		{
+			_repository.GetFilter(Arg.Any<DoctorFilterDTO>()).Returns(Task.FromResult(doctors.AsEnumerable()));
+			_repository.CountFilter(Arg.Any<DoctorFilterDTO>()).Returns(Task.FromResult(doctors.Length));
+		}
+
 
 		[Fact]
 		public async Task Handle_ReturnsPaginatedList_WhenDoctorsExist()
 		{
-			// Arrange
-			var filter = new DoctorFilterDTO { Page = 1, PageSize = 2 };
-			var doctors = new List<Doctor>
-		{
-			new Doctor("Ana", "Martínez", "Cardiology", "Heart Surgery", new Email("ana@example.com"), new PhoneNumber("5551234"), "xxxxx"),
-			new Doctor("Carlos", "Pérez", "Neurology", "Epilepsy", new Email("carlos@example.com"), new PhoneNumber("5555678"), "xxxxx")
-		};
+			ReturnDoctors(TestData.Doctor("user-1"), TestData.Doctor("user-2"));
 
-			_repository.GetFilter(Arg.Any<DoctorFilterDTO>())
-				.Returns(Task.FromResult(doctors.AsEnumerable()));
-			_repository.CountAll().Returns(Task.FromResult(2));
-
-			var handler = new GetDoctorsListHandler(_repository);
-			var query = new GetDoctorsListQuery { Page = 1, PageSize = 2 };
-
-			// Act
-			var result = await handler.Handle(query);
-
-			// Assert
-			Assert.NotNull(result);
+			var result = await new GetDoctorsListHandler(_repository).Handle(new GetDoctorsListQuery { Page = 1, PageSize = 2 });
+			
 			Assert.Equal(2, result.Total);
 			Assert.Equal(2, result.Items.Count);
 			await _repository.Received(1).GetFilter(Arg.Any<DoctorFilterDTO>());
-			await _repository.Received(1).CountAll();
+			await _repository.Received(1).CountFilter(Arg.Any<DoctorFilterDTO>());
 		}
 
 		[Fact]
 		public async Task Handle_ReturnsEmptyList_WhenNoDoctorsExist()
 		{
-			// Arrange
-			_repository.GetFilter(Arg.Any<DoctorFilterDTO>())
-				.Returns(Task.FromResult(Enumerable.Empty<Doctor>()));
-			_repository.CountAll().Returns(Task.FromResult(0));
-
-			var handler = new GetDoctorsListHandler(_repository);
-			var query = new GetDoctorsListQuery { Page = 1, PageSize = 10 };
-
-			// Act
-			var result = await handler.Handle(query);
-
-			// Assert
-			Assert.NotNull(result);
+			ReturnDoctors();
+			var result = await new GetDoctorsListHandler(_repository).Handle(new GetDoctorsListQuery { Page = 1, PageSize = 10 });
+						
 			Assert.Empty(result.Items);
 			Assert.Equal(0, result.Total);
 		}
-
+				
 		[Fact]
-		public async Task Handle_CallsRepositoryMethodsOnce()
+		public async Task Handle_MapsDoctorsToDTOsCorrectly_IncludingCatalogNames()
 		{
-			// Arrange
-			_repository.GetFilter(Arg.Any<DoctorFilterDTO>())
-				.Returns(Task.FromResult(Enumerable.Empty<Doctor>()));
-			_repository.CountAll().Returns(Task.FromResult(0));
+			var doctor = TestData.Doctor();
+			ReturnDoctors(doctor);
 
-			var handler = new GetDoctorsListHandler(_repository);
-			var query = new GetDoctorsListQuery { Page = 1, PageSize = 5 };
+			var result = await new GetDoctorsListHandler(_repository).Handle(new GetDoctorsListQuery { Page = 1, PageSize = 2 });
 
-			// Act
-			await handler.Handle(query);
-
-			// Assert
-			await _repository.Received(1).GetFilter(Arg.Any<DoctorFilterDTO>());
-			await _repository.Received(1).CountAll();
+			var dto = Assert.Single(result.Items);
+			Assert.Equal(doctor.FirstName, dto.FirstName);
+			Assert.Equal(doctor.LastName, dto.LastName);
+			Assert.Equal(doctor.ProfessionId, dto.ProfessionId);
+			Assert.Equal(doctor.Profession.Name, dto.Profession);
+			Assert.Equal(doctor.SpecialityId, dto.SpecialityId);
+			Assert.Equal(doctor.Speciality!.Name, dto.Speciality);
+			Assert.Equal(doctor.Email.Value, dto.Email);
+			Assert.Equal(doctor.PhoneNumber.Value, dto.PhoneNumber);
 		}
 
 		[Fact]
-		public async Task Handle_MapsDoctorsToDTOsCorrectly()
+		public async Task Handle_ForwardsAllFiltersToTheRepository_AndCountsWithTheSameFilter()
 		{
-			// Arrange
-			var doctor = new Doctor("Ana", "Martínez", "Cardiology", "Heart Surgery", new Email("ana@example.com"), new PhoneNumber("5551234"), "xxxxx");
+			ReturnDoctors();
+			var professionId = Guid.NewGuid();
+			var specialityId = Guid.NewGuid();
+			var query = new GetDoctorsListQuery
+            {
+				Page = 2, PageSize = 5, DoctorName = "an", ProfessionId = professionId, SpecialityId = specialityId
+			};
 
-			_repository.GetFilter(Arg.Any<DoctorFilterDTO>())
-				.Returns(Task.FromResult(new List<Doctor> { doctor }.AsEnumerable()));
-			_repository.CountAll().Returns(Task.FromResult(1));
+			await new GetDoctorsListHandler(_repository).Handle(query);
 
-			var handler = new GetDoctorsListHandler(_repository);
-			var query = new GetDoctorsListQuery { Page = 1, PageSize = 2 };
-
-			// Act
-			var result = await handler.Handle(query);
-
-			// Assert
-			Assert.Single(result.Items);
-			var dto = result.Items.First();
-
-			Assert.Equal(doctor.FirstName, dto.FirstName);
-			Assert.Equal(doctor.LastName, dto.LastName);
-			Assert.Equal(doctor.Profession, dto.Profession);
-			Assert.Equal(doctor.Speciality, dto.Speciality);
-			Assert.Equal(doctor.Email.Value, dto.Email);
-			Assert.Equal(doctor.PhoneNumber.Value, dto.PhoneNumber);
+			// The total must respect the filters too, otherwise pagination headers lie.
+			await _repository.Received(1).GetFilter(Arg.Is<DoctorFilterDTO>(f => f.Page == 2 && f.PageSize == 5 && f.DoctorName == "an"
+				&& f.ProfessionId == professionId && f.SpecialityId == specialityId));
+			await _repository.Received(1).CountFilter(Arg.Is<DoctorFilterDTO>(f =>
+				f.DoctorName == "an" && f.ProfessionId == professionId && f.SpecialityId == specialityId));
+			await _repository.DidNotReceive().CountAll();
 		}
 	}
 }

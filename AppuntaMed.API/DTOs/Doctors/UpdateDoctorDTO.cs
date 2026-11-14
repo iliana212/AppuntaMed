@@ -10,12 +10,8 @@ namespace AppuntaMed.API.DTOs.Doctors
 		[Required]
 		[StringLength(100)]
 		public required string LastName { get; set; }
-		[Required]
-		[StringLength(100)]
-		public required string Profession { get; set; }
-		[Required]
-		[StringLength(100)]
-		public required string Speciality { get; set; }
+		public required Guid ProfessionId { get; set; }
+		public Guid? SpecialityId { get; set; }
 		[Required]
 		[StringLength(254)]
 		[EmailAddress]

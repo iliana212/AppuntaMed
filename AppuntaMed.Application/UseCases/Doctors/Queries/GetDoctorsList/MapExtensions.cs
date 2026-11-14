@@ -1,7 +1,4 @@
 ﻿using AppuntaMed.Domain.Entities;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace AppuntaMed.Application.UseCases.Doctors.Queries.GetDoctorsList
 {
@@ -9,10 +6,12 @@ namespace AppuntaMed.Application.UseCases.Doctors.Queries.GetDoctorsList
 	{
 		public static DoctorsListDTO ToDTO(this Doctor doctor)
 		{
-			var dto = new DoctorsListDTO(doctor.Id, doctor.FirstName, doctor.LastName,
-				doctor.Profession,doctor.Speciality, doctor.Email.Value, doctor.PhoneNumber.Value);
+			var profession = doctor.Profession
+                ?? throw new InvalidOperationException("Doctor.Profession was not loaded");
 
-			return dto;
+			return new DoctorsListDTO(doctor.Id, doctor.FirstName, doctor.LastName,
+				doctor.ProfessionId, profession.Name, doctor.SpecialityId, doctor.Speciality?.Name,
+				doctor.Email.Value, doctor.PhoneNumber.Value);
 		}
 	}
 }

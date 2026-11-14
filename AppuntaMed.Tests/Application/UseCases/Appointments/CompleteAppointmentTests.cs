@@ -21,7 +21,7 @@ namespace AppuntaMed.Tests.Application.UseCases.Appointments
 		[Fact]
 		public async Task Handle_ValidAppointment_CompletesAndCommits()
 		{
-			var doctor = new Doctor("Ana", "Martínez", "Cardiology", "Heart Surgery", new Email("ana@example.com"), new PhoneNumber("5551234"), "xxxxx");
+			var doctor = new Doctor("Ana", "Martínez", Guid.NewGuid(), null, new Email("ana@example.com"), new PhoneNumber("5551234"), "xxxxx");
 
 			var appointment = new Appointment(Guid.NewGuid(), doctor.Id, Guid.NewGuid(),
 				new TimeInterval(DateTime.UtcNow.AddHours(1), DateTime.UtcNow.AddHours(2)));
@@ -56,8 +56,8 @@ namespace AppuntaMed.Tests.Application.UseCases.Appointments
 		[Fact]
 		public async Task Handle_RepositoryThrowsException_RollsBack()
 		{
-			var doctor = new Doctor("Ana", "Martínez", "Cardiology", "Heart Surgery", new Email("ana@example.com"), new PhoneNumber("5551234"), "xxxxx");
-		
+			var doctor = new Doctor("Ana", "Martínez", Guid.NewGuid(), null, new Email("ana@example.com"), new PhoneNumber("5551234"), "xxxxx");
+
 			var appointment = new Appointment(Guid.NewGuid(), doctor.Id, Guid.NewGuid(),
 				new TimeInterval(DateTime.UtcNow.AddHours(1), DateTime.UtcNow.AddHours(2)));
 

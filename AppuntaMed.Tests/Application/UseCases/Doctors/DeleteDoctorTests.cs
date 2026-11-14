@@ -18,8 +18,7 @@ namespace AppuntaMed.Tests.Application.UseCases.Doctors
 		[Fact]
 		public async Task Handle_ValidId_DeletesDoctorAndCommits()
 		{
-			var doctor = new Doctor("Carlos", "Pérez", "Neurology", "Epilepsy", new Email( "carlos@example.com"), new PhoneNumber("5555678"), "xxxxx");
-			_repository.GetById(doctor.Id)!.Returns(Task.FromResult(doctor));
+			var doctor = new Doctor("Carlos", "Pérez", Guid.NewGuid(), null, new Email("carlos@example.com"), new PhoneNumber("5555678"), "xxxxx"); _repository.GetById(doctor.Id)!.Returns(Task.FromResult(doctor));
 
 			var command = new DeleteDoctorCommand { Id = doctor.Id };
 			var handler = new DeleteDoctorHandler(_repository, _unitOfWork, _appointments);
@@ -44,8 +43,7 @@ namespace AppuntaMed.Tests.Application.UseCases.Doctors
 		[Fact]
 		public async Task Handle_RepositoryThrowsException_RollsBack()
 		{
-			var doctor = new Doctor("Carlos", "Pérez", "Neurology", "Epilepsy", new Email("carlos@example.com"), new PhoneNumber("5555678"), "xxxxx");
-			_repository.GetById(doctor.Id)!.Returns(Task.FromResult(doctor));
+			var doctor = new Doctor("Carlos", "Pérez", Guid.NewGuid(), null, new Email("carlos@example.com"), new PhoneNumber("5555678"), "xxxxx"); _repository.GetById(doctor.Id)!.Returns(Task.FromResult(doctor));
 			_repository.Delete(doctor).Throws(new Exception("DB error"));
 
 			var command = new DeleteDoctorCommand { Id = doctor.Id };

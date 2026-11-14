@@ -6,39 +6,66 @@ namespace AppuntaMed.Tests.Domain.Entities
 	public class DoctorUpdateTests
 	{
 		[Fact]
-		public void UpdateSpeciality_ValidValue_ChangesSpecialityAndKeepsProfession()
+		public void UpdateSpecialization_ChangesProfessionAndSpecialityTogether()
 		{
 			var doctor = TestData.Doctor();
-			var originalProfession = doctor.Profession;
+			var dentist = TestData.Profession("Dentist", "Orthodontics");
+			var orthodontics = dentist.Specialities.Single();
 
-			doctor.UpdateSpeciality("Neonatology");
+			doctor.UpdateSpecialization(dentist.Id, orthodontics.Id);
 
-			Assert.Equal("Neonatology", doctor.Speciality);
-			Assert.Equal(originalProfession, doctor.Profession);
+			Assert.Equal(dentist.Id, doctor.ProfessionId);
+			Assert.Equal(orthodontics.Id, doctor.SpecialityId);
 		}
 
 		[Fact]
-		public void UpdateProfession_ValidValue_ChangesProfessionAndKeepsSpeciality()
+		public void UpdateSpecialization_NullSpeciality_ClearsSpeciality()
 		{
 			var doctor = TestData.Doctor();
-			var originalSpeciality = doctor.Speciality;
+			var professionId = doctor.ProfessionId;
 
-			doctor.UpdateProfession("Pediatrics");
+			doctor.UpdateSpecialization(professionId, null);
 
-			Assert.Equal("Pediatrics", doctor.Profession);
-			Assert.Equal(originalSpeciality, doctor.Speciality);
+			Assert.Equal(professionId, doctor.ProfessionId);
+			Assert.Null(doctor.SpecialityId);
 		}
 
-		[Theory]
-		[InlineData("")]
-		[InlineData("   ")]
-        public void UpdateSpeciality_BlankValue_ThrowsBusinessRuleException_AndKeepsSpeciality(string blank)
-        {
+		[Fact]
+		public void UpdateSpecialization_EmptyProfessionId_ThrowsAndKeepsValues()
+		{
 			var doctor = TestData.Doctor();
-			var original = doctor.Speciality;
-	
-			Assert.Throws<BusinessRuleException>(() => doctor.UpdateSpeciality(blank));
-			Assert.Equal(original, doctor.Speciality);
-	     }
+			var professionId = doctor.ProfessionId;
+			var specialityId = doctor.SpecialityId;
+
+			Assert.Throws<BusinessRuleException>(() => doctor.UpdateSpecialization(Guid.Empty, null));
+
+			Assert.Equal(professionId, doctor.ProfessionId);
+			Assert.Equal(specialityId, doctor.SpecialityId);
+		}
+
+		[Fact]
+		public void UpdateSpecialization_EmptySpecialityId_Throws()
+		{
+			var doctor = TestData.Doctor();
+			Assert.Throws<BusinessRuleException>(() => doctor.UpdateSpecialization(doctor.ProfessionId, Guid.Empty));
+		}
+
+		[Fact]
+		public void AssignCatalog_MatchingIds_ExposesNames()
+		{
+			var doctor = TestData.Doctor();
+
+			Assert.Equal("Physician", doctor.Profession.Name);
+			Assert.Equal("Cardiology", doctor.Speciality!.Name);
+		}
+
+		[Fact]
+		public void AssignCatalog_ProfessionOfAnotherDoctor_ThrowsBusinessRuleException()
+		{
+			var doctor = TestData.Doctor();
+			var other = TestData.Profession("Dentist", "Orthodontics");
+
+			Assert.Throws<BusinessRuleException>(() => doctor.AssignCatalog(other, other.Specialities.Single()));
+		}
 	}
 }

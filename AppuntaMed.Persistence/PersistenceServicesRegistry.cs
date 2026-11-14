@@ -24,6 +24,8 @@ namespace AppuntaMed.Persistence
 
 			services.AddScoped<IAppointmentRepository, AppointmentRepository>();
 
+			services.AddScoped<IProfessionRepository, ProfessionRepository>();
+
 			services.AddScoped<IUnitOfWork, UnitOfWorkEFCore>();
 			
 			return services;

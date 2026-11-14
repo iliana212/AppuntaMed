@@ -20,13 +20,18 @@ namespace AppuntaMed.Persistence.Configurations
 				.HasMaxLength(100)
 				.IsRequired();
 
-			builder.Property(prop => prop.Profession)
-				.HasMaxLength(100)
-				.IsRequired();
+			builder.HasOne(prop => prop.Profession)
+                .WithMany()
+                .HasForeignKey(prop => prop.ProfessionId)
+                .OnDelete(DeleteBehavior.Restrict)
+ 				.IsRequired();
 
-			builder.Property(prop => prop.Speciality)
-				.HasMaxLength(100)
-				.IsRequired();
+			builder.HasOne(prop => prop.Speciality)
+                .WithMany()
+                .HasForeignKey(prop => new { prop.ProfessionId, prop.SpecialityId })
+                .HasPrincipalKey(speciality => new { speciality.ProfessionId, speciality.Id })
+                .OnDelete(DeleteBehavior.Restrict)
+                .IsRequired(false);
 
 			builder.ComplexProperty(prop => prop.Email, action =>
 			{

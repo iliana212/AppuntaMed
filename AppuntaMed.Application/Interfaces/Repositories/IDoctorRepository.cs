@@ -7,6 +7,8 @@ namespace AppuntaMed.Application.Interfaces.Repositories
 	{
 		Task<IEnumerable<Doctor>> GetFilter(DoctorFilterDTO filter);
 
+		Task<int> CountFilter(DoctorFilterDTO filter);
+
 		Task<bool> ExistsByUserId(string userId);
 
 		Task<Doctor?> GetByUserId(string userId);

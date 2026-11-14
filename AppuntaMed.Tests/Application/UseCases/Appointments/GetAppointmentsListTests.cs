@@ -23,8 +23,7 @@ namespace AppuntaMed.Tests.Application.UseCases.Appointments
 		{
 			// Arrange
 			var patient = new Patient("Ana", "López", new DateTime(1990, 1, 1), new PhoneNumber("5551234"), new Email("ana@example.com"), "xxxxx");
-			var doctor = new Doctor("Carlos", "Pérez", "Cardiology", "Heart Surgery", new Email("carlos@example.com"), new PhoneNumber("5555678"), "xxxxx");
-			var consultingRoom = new ConsultingRoom("Room A");
+			var doctor = new Doctor("Carlos", "Pérez", Guid.NewGuid(), null, new Email("carlos@example.com"), new PhoneNumber("5555678"), "xxxxx"); var consultingRoom = new ConsultingRoom("Room A");
 			var interval = new TimeInterval(DateTime.UtcNow.AddHours(1), DateTime.UtcNow.AddHours(2));
 
 			var appointment = new Appointment(patient.Id, doctor.Id, consultingRoom.Id, interval);
@@ -77,8 +76,7 @@ namespace AppuntaMed.Tests.Application.UseCases.Appointments
 		{
 			// Arrange
 			var patient = new Patient("Ana", "López", new DateTime(1990, 1, 1), new PhoneNumber("5551234"), new Email("ana@example.com"), "xxxxx");
-			var doctor = new Doctor("Carlos", "Pérez", "Cardiology", "Heart Surgery", new Email("carlos@example.com"), new PhoneNumber("5555678"), "xxxxx");
-			var consultingRoom = new ConsultingRoom("Room A");
+			var doctor = new Doctor("Carlos", "Pérez", Guid.NewGuid(), null, new Email("carlos@example.com"), new PhoneNumber("5555678"), "xxxxx"); var consultingRoom = new ConsultingRoom("Room A");
 			var interval = new TimeInterval(DateTime.UtcNow.AddHours(1), DateTime.UtcNow.AddHours(2));
 
 			var appointment = new Appointment(patient.Id, doctor.Id, consultingRoom.Id, interval);

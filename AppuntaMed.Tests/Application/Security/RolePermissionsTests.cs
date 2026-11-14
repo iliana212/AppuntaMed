@@ -67,7 +67,25 @@ namespace AppuntaMed.Tests.Application.Security
 			var unknown = RolePermissions.Map.Values.SelectMany(x => x).Where(x => !declared.Contains(x)).ToList();
 	
 			Assert.Empty(unknown);
-	    }
+		}
+
+		[Theory]
+		[InlineData("Admin")]
+		[InlineData("Doctor")]
+		[InlineData("Patient")]
+		public void EveryRole_CanReadTheProfessionCatalog(string role)
+		{
+			Assert.Contains(Permissions.ProfessionRead, RolePermissions.Map[role]);
+		}
+
+		[Fact]
+		public void All_ListsEveryDeclaredPermission_WithoutDuplicates()
+		{
+			var declared = AllDeclaredPermissions().ToList();
+
+			Assert.Equal(declared.OrderBy(x => x), Permissions.All.OrderBy(x => x));
+			Assert.Equal(declared.Count, Permissions.All.Distinct().Count());
+		}
 
 		[Fact]
         public void NoRole_HasDuplicatedPermissions()
