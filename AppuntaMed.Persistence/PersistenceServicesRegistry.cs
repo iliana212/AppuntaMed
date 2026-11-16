@@ -1,9 +1,11 @@
 ﻿using AppuntaMed.Application.Interfaces.DataStore;
 using AppuntaMed.Application.Interfaces.Repositories;
 using AppuntaMed.Persistence.Repositories;
+using AppuntaMed.Persistence.Seeding;
 using AppuntaMed.Persistence.UnitOfWork;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -12,9 +14,20 @@ namespace AppuntaMed.Persistence
 {
 	public static class PersistenceServicesRegistry
 	{
-		public static IServiceCollection AddPersistenceServices(this IServiceCollection services)
+		public static IServiceCollection AddPersistenceServices(this IServiceCollection services, bool seedDemoData = false) // Opt-in (Seeding:DemoData)
 		{
-			services.AddDbContext<AppuntaMedDbContext>(options => options.UseSqlServer("name=AppuntaMedSqlServer"));
+			//services.AddDbContext<AppuntaMedDbContext>(options => options.UseSqlServer("name=AppuntaMedSqlServer"));
+			services.AddDbContext<AppuntaMedDbContext>(options =>
+            {
+				options.UseSqlServer("name=AppuntaMedSqlServer");
+				
+				if (seedDemoData)
+				{
+					options
+					.UseSeeding((context, _) => DemoDataSeeder.Seed(context, DateTime.UtcNow))
+					.UseAsyncSeeding((context, _, cancellationToken) => DemoDataSeeder.SeedAsync(context, DateTime.UtcNow, cancellationToken));
+				}
+			});
 
 			services.AddScoped<IConsultingRoomRepository, ConsultingRoomRepository>();
 

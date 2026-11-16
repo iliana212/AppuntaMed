@@ -18,7 +18,7 @@ builder.Services.AddControllers();
 builder.Services.AddHttpClient();
 
 builder.Services.AddApplicationServices();
-builder.Services.AddPersistenceServices();
+builder.Services.AddPersistenceServices(seedDemoData: builder.Configuration.GetValue<bool>("Seeding:DemoData")); //Demo data is opt-in
 builder.Services.AddNotificationServices();
 builder.Services.AddSecurityServices();
 
