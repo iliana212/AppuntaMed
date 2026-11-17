@@ -1,15 +1,105 @@
+# Local demo stack: API + SQL Server + Keycloak + Mailpit (catches the emails the API sends).
+#
+#   cp .env.example .env     # then edit the passwords
+#   docker compose up -d --build
+#
+#   API / Scalar ....... http://localhost:8081/scalar
+#   Keycloak ........... http://localhost:8080   (admin: see .env)
+#   Mailpit (emails) ... http://localhost:8025
+#
+# Reset everything (database, Keycloak realm, emails):  docker compose down -v
 services:
 
-  # ---------------------------------------------------------
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: appuntamed_sqlserver
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: Developer
+      MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD:?Set MSSQL_SA_PASSWORD in .env (see .env.example)}
+    ports:
+      - "127.0.0.1:1433:1433"
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P \"$$MSSQL_SA_PASSWORD\" -Q 'SELECT 1' -b -o /dev/null"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+
   keycloak:
-    image: quay.io/keycloak/keycloak:24.0.1
-    container_name: keycloak_dev
+    image: quay.io/keycloak/keycloak:${KEYCLOAK_VERSION:-24.0.1}
+    container_name: appuntamed_keycloak
     command: start-dev --import-realm
     environment:
-      KEYCLOAK_ADMIN: ${KEYCLOAK_USER}
-      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_PASSWD}
+      KEYCLOAK_ADMIN: ${KEYCLOAK_USER:?Set KEYCLOAK_USER in .env}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_PASSWD:?Set KEYCLOAK_PASSWD in .env}
+      # Tokens are issued for http://localhost:8080 (what the browser/Scalar uses) ...
+      KC_HOSTNAME_URL: http://localhost:8080
+      KC_HOSTNAME_BACKCHANNEL_DYNAMIC: "true"
     ports:
       - "8080:8080"
     volumes:
+      # The realm (roles, client, demo users) is imported only the FIRST time (while the volume is empty).
       - ./keycloak:/opt/keycloak/data/import:ro
- 
+      - keycloak_data:/opt/keycloak/data
+    healthcheck:
+      # The image has no curl: open a TCP connection and ask for the realm (200 once it has been imported).
+      test: ["CMD", "bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/8080 && printf 'GET /realms/AppuntaMed HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3 && read -r status <&3 && [[ \"$$status\" == *' 200 '* ]]"]
+      interval: 10s
+      timeout: 5s
+      retries: 18
+      start_period: 40s
+
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: appuntamed_mailpit
+    environment:
+      MP_SMTP_AUTH_ACCEPT_ANY: "1"
+      MP_SMTP_AUTH_ALLOW_INSECURE: "1"
+    ports:
+      - "8025:8025"
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: appuntamed_api
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+      mailpit:
+        condition: service_started
+    environment:
+      # Demo stack: Development enables Scalar (/scalar) and the OpenAPI document.
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__AppuntaMedSqlServer: "Server=sqlserver,1433;Database=AppuntaMed;User Id=sa;Password=${MSSQL_SA_PASSWORD};TrustServerCertificate=True"
+      # Apply EF Core migrations on startup and insert the demo data (both opt-in settings).
+      Database__MigrateOnStartup: "true"
+      Seeding__DemoData: "true"
+      # Keycloak as seen from inside the Docker network.
+      Authentication__Authority: http://keycloak:8080/realms/AppuntaMed
+      Authentication__Audience: appuntamed-api
+      Authentication__RequireHttpsMetadata: "false"
+      Reminders__TimeZoneId: America/Mexico_City
+      # Emails go to Mailpit (no TLS, no real account).
+      CONFIG_EMAIL__EMAIL: no-reply@appuntamed.test
+      CONFIG_EMAIL__PASSWD: unused
+      CONFIG_EMAIL__HOST: mailpit
+      CONFIG_EMAIL__PORT: "1025"
+      CONFIG_EMAIL__ENABLE_SSL: "false"
+    ports:
+      - "8081:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8080/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+
+volumes:
+  sqlserver_data:
+  keycloak_data:

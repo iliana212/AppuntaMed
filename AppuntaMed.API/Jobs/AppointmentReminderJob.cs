@@ -3,9 +3,9 @@ using AppuntaMed.Application.Utilities.Mediator;
 
 namespace AppuntaMed.API.Jobs
 {
-	public class AppointmentReminderJob(IServiceScopeFactory scopeFactory, ILogger<AppointmentReminderJob> logger) : BackgroundService
+	public class AppointmentReminderJob(IServiceScopeFactory scopeFactory, ILogger<AppointmentReminderJob> logger, IConfiguration config) : BackgroundService
 	{
-		private readonly TimeZoneInfo timeZone = TimeZoneInfo.FindSystemTimeZoneById("Central Standard Time");
+		private readonly TimeZoneInfo timeZone = ReminderTimeZone.Resolve(config["Reminders:TimeZoneId"]);
 
 		protected override async Task ExecuteAsync(CancellationToken stoppingToken)
 		{

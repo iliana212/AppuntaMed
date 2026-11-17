@@ -6,6 +6,7 @@ using AppuntaMed.Notifications;
 using AppuntaMed.Persistence;
 using AppuntaMed.Security;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
 
@@ -28,6 +29,7 @@ builder.Services.AddProblemDetails();
 builder.Services.AddHostedService<AppointmentReminderJob>();
 
 builder.Services.AddOpenApi();
+builder.Services.AddHealthChecks();
 
 // --- CONFIGURACIÓN DE KEYCLOAK / JWT BEARER ---
 var authority = builder.Configuration["Authentication:Authority"];
@@ -63,12 +65,18 @@ builder.Services.AddAppAuthorization();
 
 var app = builder.Build();
 
+if (app.Configuration.GetValue<bool>("Database:MigrateOnStartup"))
+{
+	await using var scope = app.Services.CreateAsyncScope();
+	var dbContext = scope.ServiceProvider.GetRequiredService<AppuntaMedDbContext>();
+	await dbContext.Database.MigrateAsync();
+}
+
 // Configure the HTTP request pipeline.
 
 if (app.Environment.IsDevelopment())
 {
 	app.MapOpenApi();
-
 	app.MapScalarApiReference(options =>
 	{
 		options.WithTitle("AppuntaMed API").WithTheme(ScalarTheme.BluePlanet);			
@@ -83,5 +91,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapHealthChecks("/health");
 
 app.Run();

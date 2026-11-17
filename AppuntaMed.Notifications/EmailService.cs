@@ -59,12 +59,14 @@ namespace AppuntaMed.Notifications
 			var host = configuration.GetValue<string>("CONFIG_EMAIL:HOST");
 			var port = configuration.GetValue<int>("CONFIG_EMAIL:PORT");
 
-			var smtp = new SmtpClient(host, port);
-			smtp.EnableSsl = true;
+			var enableSsl = configuration.GetValue<bool?>("CONFIG_EMAIL:ENABLE_SSL") ?? true;
+			
+			using var smtp = new SmtpClient(host, port);
+			smtp.EnableSsl = enableSsl;
 			smtp.UseDefaultCredentials = false;
 			smtp.Credentials = new NetworkCredential(baseMail, passwd);
 
-			var message = new MailMessage(baseMail!, email, subject, body);
+			using var message = new MailMessage(baseMail!, email, subject, body);
 			await smtp.SendMailAsync(message);
 		}
 

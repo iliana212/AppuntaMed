@@ -1,0 +1,14 @@
+**/bin/
+**/obj/
+**/.vs/
+**/.idea/
+**/*.user
+.git/
+.github/
+.env
+.env.*
+docker-compose*.yml
+Dockerfile*
+keycloak/
+AppuntaMed.Tests/
+**/*.md

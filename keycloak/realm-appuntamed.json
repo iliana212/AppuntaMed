@@ -653,7 +653,8 @@
       "clientAuthenticatorType": "client-secret",
       "redirectUris": [
         "http://localhost:5284/*",
-        "https://localhost:7211/*"
+        "https://localhost:7211/*",
+        "http://localhost:8081/*"
       ],
       "webOrigins": [
         "+"
