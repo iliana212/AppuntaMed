@@ -95,3 +95,5 @@ app.MapControllers();
 app.MapHealthChecks("/health");
 
 app.Run();
+
+public partial class Program { }  //Program class visible to WebApplicationFactory<Program> in the tests.

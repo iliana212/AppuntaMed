@@ -16,7 +16,7 @@ namespace AppuntaMed.Application.UseCases.Patients.Queries.GetPatientsList
 			};
 			var patients = await repository.GetFilter(filter);
 
-			var totalPatients = await repository.CountAll();
+			var totalPatients = await repository.CountFilter(filter);
 			var dto = patients.Select(x => x.ToDTO()).ToList();
 
 			var patientsDTO = new PaginationDTO<PatientsListDTO>

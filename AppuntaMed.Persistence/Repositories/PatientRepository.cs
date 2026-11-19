@@ -3,6 +3,7 @@ using AppuntaMed.Application.UseCases.Patients.Queries.GetPatientsList;
 using AppuntaMed.Domain.Entities;
 using AppuntaMed.Persistence.Utilities;
 using Microsoft.EntityFrameworkCore;
+using static System.Net.WebRequestMethods;
 
 namespace AppuntaMed.Persistence.Repositories
 {
@@ -27,6 +28,20 @@ namespace AppuntaMed.Persistence.Repositories
 
 		public async Task<IEnumerable<Patient>> GetFilter(PatientFilterDTO filter)
 		{
+			return await ApplyFilter(filter)
+               .OrderBy(x => x.FirstName).ThenBy(x => x.LastName)
+               .Pagination(filter.Page, filter.PageSize)
+               .ToListAsync();
+		}
+
+		public async Task<int> CountFilter(PatientFilterDTO filter)
+		{
+			return await ApplyFilter(filter).CountAsync();
+		}
+
+		private IQueryable<Patient> ApplyFilter(PatientFilterDTO filter)
+		{
+
 			var queryable = _context.Patients.AsQueryable();
 
 			if (!string.IsNullOrWhiteSpace(filter.PatientName))
@@ -35,9 +50,7 @@ namespace AppuntaMed.Persistence.Repositories
 					|| x.LastName.Contains(filter.PatientName));
 			}
 
-			return await queryable.OrderBy(x => x.FirstName).ThenBy(x => x.LastName)
-				.Pagination(filter.Page, filter.PageSize)
-				.ToListAsync();
+			return queryable;
 		}
 	}
 }

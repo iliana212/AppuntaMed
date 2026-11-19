@@ -3,9 +3,6 @@ using AppuntaMed.Application.UseCases.Patients.Queries.GetPatientsList;
 using AppuntaMed.Domain.Entities;
 using AppuntaMed.Domain.ValueObjects;
 using NSubstitute;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace AppuntaMed.Tests.Application.UseCases.Patients
 {
@@ -24,7 +21,7 @@ namespace AppuntaMed.Tests.Application.UseCases.Patients
 			};
 
 			_repository.GetFilter(Arg.Any<PatientFilterDTO>()).Returns(Task.FromResult(patients.AsEnumerable()));
-			_repository.CountAll().Returns(Task.FromResult(2));
+			_repository.CountFilter(Arg.Any<PatientFilterDTO>()).Returns(Task.FromResult(2));
 
 			var handler = new GetPatientsListHandler(_repository);
 			var query = new GetPatientsListQuery { Page = 1, PageSize = 2 };
@@ -37,7 +34,7 @@ namespace AppuntaMed.Tests.Application.UseCases.Patients
 			Assert.Equal(2, result.Total);
 			Assert.Equal(2, result.Items.Count);
 			await _repository.Received(1).GetFilter(Arg.Any<PatientFilterDTO>());
-			await _repository.Received(1).CountAll();
+			await _repository.Received(1).CountFilter(Arg.Any<PatientFilterDTO>());
 		}
 
 		[Fact]
@@ -45,7 +42,7 @@ namespace AppuntaMed.Tests.Application.UseCases.Patients
 		{
 			// Arrange
 			_repository.GetFilter(Arg.Any<PatientFilterDTO>()).Returns(Task.FromResult(Enumerable.Empty<Patient>()));
-			_repository.CountAll().Returns(Task.FromResult(0));
+			_repository.CountFilter(Arg.Any<PatientFilterDTO>()).Returns(Task.FromResult(0));
 
 			var handler = new GetPatientsListHandler(_repository);
 			var query = new GetPatientsListQuery { Page = 1, PageSize = 10 };
@@ -64,7 +61,7 @@ namespace AppuntaMed.Tests.Application.UseCases.Patients
 		{
 			// Arrange
 			_repository.GetFilter(Arg.Any<PatientFilterDTO>()).Returns(Task.FromResult(Enumerable.Empty<Patient>()));
-			_repository.CountAll().Returns(Task.FromResult(0));
+			_repository.CountFilter(Arg.Any<PatientFilterDTO>()).Returns(Task.FromResult(0));
 
 			var handler = new GetPatientsListHandler(_repository);
 			var query = new GetPatientsListQuery { Page = 1, PageSize = 5 };
@@ -74,7 +71,7 @@ namespace AppuntaMed.Tests.Application.UseCases.Patients
 
 			// Assert
 			await _repository.Received(1).GetFilter(Arg.Any<PatientFilterDTO>());
-			await _repository.Received(1).CountAll();
+			await _repository.Received(1).CountFilter(Arg.Any<PatientFilterDTO>());
 		}
 
 		[Fact]
@@ -85,7 +82,7 @@ namespace AppuntaMed.Tests.Application.UseCases.Patients
 				new PhoneNumber("5551234"), new Email("ana@example.com"), "xxxxx");
 
 			_repository.GetFilter(Arg.Any<PatientFilterDTO>()).Returns(Task.FromResult(new List<Patient> { patient }.AsEnumerable()));
-			_repository.CountAll().Returns(Task.FromResult(1));
+			_repository.CountFilter(Arg.Any<PatientFilterDTO>()).Returns(Task.FromResult(1));
 
 			var handler = new GetPatientsListHandler(_repository);
 			var query = new GetPatientsListQuery { Page = 1, PageSize = 2 };
@@ -101,6 +98,18 @@ namespace AppuntaMed.Tests.Application.UseCases.Patients
 			Assert.Equal(patient.LastName, dto.LastName);
 			Assert.Equal(patient.Email.Value, dto.Email);
 			Assert.Equal(patient.PhoneNumber.Value, dto.PhoneNumber);
+		}
+
+		[Fact]
+		public async Task Handle_CountsWithTheSameFilter_SoTheTotalRespectsTheName()
+		{
+			_repository.GetFilter(Arg.Any<PatientFilterDTO>()).Returns(Task.FromResult(Enumerable.Empty<Patient>()));
+			_repository.CountFilter(Arg.Any<PatientFilterDTO>()).Returns(Task.FromResult(0));
+
+			await new GetPatientsListHandler(_repository).Handle(new GetPatientsListQuery { Page = 2, PageSize = 5, PatientName = "Ram" });
+
+			await _repository.Received(1).CountFilter(Arg.Is<PatientFilterDTO>(f => f.PatientName == "Ram"));
+			await _repository.DidNotReceive().CountAll();
 		}
 	}
 }
