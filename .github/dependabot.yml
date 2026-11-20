@@ -1,0 +1,44 @@
+version: 2
+updates:
+  # NuGet packages of every project (each one lives in its own folder).
+  - package-ecosystem: nuget
+    directories:
+      - "/AppuntaMed.*"
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    groups:
+      microsoft:
+        patterns:
+          - "Microsoft.*"
+          - "System.*"
+        update-types: [minor, patch]
+      testing:
+        patterns:
+          - "xunit*"
+          - "NSubstitute*"
+          - "Testcontainers*"
+          - "coverlet*"
+          - "FluentValidation*"
+        update-types: [minor, patch]
+
+  # The versions of the actions used by the workflows (this repository pins them to a major version).
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns: ["*"]
+
+  # Base images of the Dockerfile and of docker-compose.yml.
+  - package-ecosystem: docker
+    directory: "/"
+    schedule:
+      interval: weekly
+
+  - package-ecosystem: docker-compose
+    directory: "/"
+    schedule:
+      interval: weekly
