@@ -16,7 +16,7 @@ RUN dotnet publish AppuntaMed.API/AppuntaMed.API.csproj -c Release -o /app/publi
 
 # ---------- runtime ----------
 # Keep a Debian-based image: it ships tzdata and ICU, which the reminder job needs for its time zone.
-FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
+FROM mcr.microsoft.com/dotnet/aspnet:11.0 AS final
 WORKDIR /app
 
 # curl is only used by the container HEALTHCHECK.
