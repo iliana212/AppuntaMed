@@ -48,7 +48,7 @@ namespace AppuntaMed.Tests.API.Jobs
 		[Fact]
         public void DefaultAppsettings_ContainsAValidTimeZone()
         {
-	        using var document = JsonDocument.Parse(RepoFiles.Read(Path.Combine("AppuntaMed.API", "appsettings.Development.json")));
+	        using var document = JsonDocument.Parse(RepoFiles.Read(Path.Combine("AppuntaMed.API", "appsettings.json")));
 			var configured = document.RootElement.GetProperty("Reminders").GetProperty("TimeZoneId").GetString();
 	
 			var exception = Record.Exception(() => ReminderTimeZone.Resolve(configured));
