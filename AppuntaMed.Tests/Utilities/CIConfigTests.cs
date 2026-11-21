@@ -115,6 +115,17 @@ namespace AppuntaMed.Tests.Utilities
 		}
 
 		[Fact]
+		public void Dependabot_DoesNotJumpToANewDotNetMajor_OrToSqlServer2025()
+		{
+			// A new .NET major version needs the target framework to change with it, and the SQL Server 2025 image
+			// has no sqlcmd (the compose healthcheck needs it): both would only produce red pull requests.
+			var dependabot = RepoFiles.Read(Path.Combine(".github", "dependabot.yml"));
+
+			foreach (var dependency in new[] { "Microsoft.*", "System.*", "dotnet/sdk", "dotnet/aspnet", "mssql/server" })
+				Assert.Contains($"dependency-name: \"{dependency}\"", dependabot);
+		}
+
+		[Fact]
 		public void CodeQl_AnalyzesCSharp_OnPullRequestsAndOnASchedule()
 		{
 			var codeql = RepoFiles.Read(Path.Combine(".github", "workflows", "codeql.yml"));
